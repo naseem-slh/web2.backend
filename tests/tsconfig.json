@@ -1,0 +1,9 @@
+{ // Konfiguration ist nur für VSCode relevant!
+  "extends": "../tsconfig.json", // Konfiguration so wie im Projekt
+  "compilerOptions": {
+    "noEmit": true               // Tests werden von ts-jest on-thy-fly übersetzt
+  },
+          // Nur für VSCode relevant, ermögliche so Zugriff auf 
+          // die eigentichen Quelldaten (für Content Assist wie Quick Fixes)
+  "include": ["../src/**/*", "./**/*"] 
+}

@@ -1,0 +1,58 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Die folgenden Tests setzen voraus, dass alle Aufrufe in
+#
+#             1_createDemo.http
+#
+# erfolgreich ausgeführt wurden. 2_updateDemo.http kann ausgeführt worden sein, das ist hier egal.
+#
+# Die folgenden Positivtests löschen nacheinander die bestehenden Daten, also ShopItem, ShopList und User.
+#
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller User, sollte einen User anzeigen
+# 2. Abfragen des Shoppers, sollte eine ShopList (mit shopitem count 1) anzeigen
+# 3. Abfragen des ShopList-ShopItems, sollte ein ShopItem anzeigen
+# 4. Löschen des ShopItems
+# 5. Abfragen der ShopList-ShopItems, sollte keine ShopItems mehr anzeigen
+# 6. Löschen der ShopList
+# 7. Abfragen des Shoppers, sollte keine ShopLists mehr anzeigen
+# 8. Löschen des Users
+# 9. Abfragen aller User, sollte keine User mehr anzeigen
+
+###
+# @name getUsers
+GET {{host}}/users/
+
+###
+@userId = {{getUsers.response.body.$.users[0].id}}
+###
+# @name getShopper
+GET {{host}}/shopper/
+
+###
+@shoplistId = {{getShopper.response.body.$.shopLists[0].id}}
+###
+# @name getShopItems
+GET {{host}}/shoplist/{{shoplistId}}/shopitems
+
+###
+@shopitemId = {{getShopItems.response.body.$.shopItems[0].id}}
+###
+DELETE {{host}}/shopitem/{{shopitemId}}
+
+###
+GET {{host}}/shoplist/{{shoplistId}}/shopitems
+
+###
+DELETE {{host}}/shoplist/{{shoplistId}}
+
+###
+GET {{host}}/shopper/
+
+###
+DELETE {{host}}/user/{{userId}}
+
+###
+GET {{host}}/users/

@@ -1,0 +1,61 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Positivtests, lassen sich der Reihenfolge nach
+# aufrufen.
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller User (zeigt nichts an)
+# 2. Erzeugen eines Users
+# 3. Abfragen aller User (zeigt dann den erzeugen User)
+# 4. Erzeugen einer ShopList
+# 5. Abfragen des Shoppers (zeigt dann die erzeugte ShopList)
+# 6. Erzeugen eines ShopItems
+# 7. Abfragen des Shoppers (zeigt dann die erzeugte ShopList mit ShopItem-Count 1)
+# 8. Abfragen der ShopLists mit dem ShopItem (zeigt dann die erzeugte ShopItem)
+#
+# Wir haben also einen User, einen Kanal und eine ShopItem erzeugt.
+
+###
+GET {{host}}/users/
+
+###
+# @name postUserJane
+POST {{host}}/user/
+Content-Type: application/json
+
+{ "name": "Jane", "email": "jane@doe.de", "password": "abc", "admin": false}
+
+###
+@userId = {{postUserJane.response.body.$.id}}
+###
+GET {{host}}/users/
+
+###
+
+# @name postShopListJanesShopList
+POST {{host}}/shoplist/
+Content-Type: application/json
+
+{ "store": "Mensa", "public": true, "done": false, "creator": "{{userId}}"}
+
+###
+GET {{host}}/shopper/
+
+###
+@shoplistId = {{postShopListJanesShopList.response.body.$.id}}
+###
+POST {{host}}/shopitem/
+Content-Type: application/json
+
+{ "name": "Sojabolognese", "quantity": "1 Teller", "creator": "{{userId}}" , "shopList": "{{shoplistId}}"}
+
+###
+@shopitemId = {{postShopListJanesShopList.response.body.$.id}}
+###
+GET {{host}}/shopper/
+
+###
+GET {{host}}/shoplist/{{shoplistId}}/shopitems
+
+###

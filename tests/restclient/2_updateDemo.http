@@ -1,0 +1,72 @@
+@host = http://localhost:3000
+
+# ----------------------------------------------------
+# Die folgenden Tests setzen voraus, dass alle Aufrufe in
+#
+#             1_createDemo.http
+#
+# erfolgreich ausgeführt wurden (und 3_deleteDemo.http nicht ausgeführt wurde).
+#
+# Die folgenden Positivtests ändern die bestehenden Daten, also User, ShopList und ShopItem.
+#
+# Wir gehen dabei folgende Schritte durch:
+#
+# 1. Abfragen aller User (zeigt dann den erzeugen "Jane")
+# 2. Ändern des Usernamens in "Tarzan"
+# 3. Abfragen aller User (zeigt dann "Tarzan")
+# 4. Abfragen des Shoppers (zeigt einen ShopList "Mensa", Autorname ist bereits Tarzan)
+# 5. Umbennen des ShopLists Store in "Kiosk"
+# 6. Abfragen des Shoppers (zeigt nun "Kiosk")
+# 8. Abfragen des ShopLists mit der ShopItem (zeigt ShopItem)
+# 5. Ändern des ShopItem-Titels in "Kaffee"
+# 8. Abfragen des ShopLists mit der ShopItem (zeigt nun ShopItem "Kaffee")
+#
+
+###
+# @name getUsers
+GET {{host}}/users/
+
+###
+@userId = {{getUsers.response.body.$.users[0].id}}
+###
+PUT {{host}}/user/{{userId}}
+Content-Type: application/json
+
+{ "id":"{{userId}}", "name": "Tarzan", "email": "tarzan@doe.de" }
+
+###
+GET {{host}}/users/
+
+###
+# @name getShopper
+GET {{host}}/shopper/
+
+###
+@shoplistId = {{getShopper.response.body.$.shopLists[0].id}}
+###
+PUT {{host}}/shoplist/{{shoplistId}}
+Content-Type: application/json
+
+{ "id": "{{shoplistId}}", "store": "Kiosk", "public": true, "done": false}
+
+###
+GET {{host}}/shopper/
+
+###
+# @name getShopItems
+GET {{host}}/shoplist/{{shoplistId}}/shopitems
+
+###
+@shopitemId = {{getShopItems.response.body.$.shopItems[0].id}}
+###
+
+PUT {{host}}/shopitem/{{shopitemId}}
+Content-Type: application/json
+
+{ "id":"{{shopitemId}}", "name": "Kaffee", "quantity": "1 Tasse to Go"}
+
+###
+GET {{host}}/shoplist/{{shoplistId}}/shopitems
+
+###
+
